@@ -10,9 +10,7 @@ What did you expect?
 
 * grep
 
-* awk
-
 * sed
 
-You probably already have this on your system.  If you don't then I have no 
+You probably already have these on your system.  If you don't then I have no 
 idea what's wrong with you.
