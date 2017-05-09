@@ -11,8 +11,9 @@ function bkv::__validate_key () {
 
 function bkv::set_value () {
 	FILE=$1
-	KEY=$(bkv::__validate_key $1)
-	VALUE=$(sed 's/=/==/g' $3)
+	touch $FILE
+	KEY=$(bkv::__validate_key $2)
+	VALUE=$(echo $3 | sed 's/=/==/g')
 	PRESENT=$(bkv::is_set $KEY)
 	
 	# Remove it from the file if necessary.
@@ -22,22 +23,28 @@ function bkv::set_value () {
 	
 	# Append the value
 	echo "$KEY=$VALUE" >> $FILE
+
+	# Cleanup newlines ( from http://stackoverflow.com/questions/7359527/ )
+	sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' file
 }
 
 function bkv::get_value () {
 	FILE=$1
-	KEY=$(bkv::__validate_key $1)
+	touch $FILE
+	KEY=$(bkv::__validate_key $2)
 	
 	# Look for the line then pull out the prefix.
-	grep "^$KEY=" $FILE | sed "s/^$KEY=//"
+	grep "^$KEY=" $FILE | sed "s/^$KEY=//" | sed 's/==/=/g'
 }
 
 function bkv::is_set () {
 	FILE=$1
-	KEY=$(bkv::__validate_key $1)
+	touch $FILE
+	KEY=$(bkv::__validate_key $2)
 	
 	# Here we just see if any lines match the regex for what we expect.
-	if [ -n $(grep -E "^$KEY=([^=]|==)*" $FILE) ]; then
+	OUT=$(grep -E "^$KEY=([^=]|==)*" $FILE)
+	if [ -n "$OUT" ]; then
 		echo 'true'
 	else
 		echo 'false'
